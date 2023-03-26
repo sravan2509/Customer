@@ -44,11 +44,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Customer already exists", http.StatusBadRequest)
 		return
 	}
-	// if !isPasswordValid(newCustomer.Password) {
-	// 	http.Error(w, "Password is not valid", http.StatusBadRequest)
-	// 	return
-	// }
-	if newCustomer.Password == "" || newCustomer.Password == " " {
+	if !Validation.IsPasswordValid(newCustomer.Password) {
 		http.Error(w, "Password is not valid", http.StatusBadRequest)
 		return
 	}

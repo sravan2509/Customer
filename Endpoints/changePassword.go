@@ -47,15 +47,11 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Customer with email address not found", http.StatusBadRequest)
 		return
 	}
-	// if !isPasswordValid(changecustomerlogin.Password) {
-	// 	http.Error(w, "Password is not valid", http.StatusBadRequest)
-	// 	return
-	// }
-	if changecustomerlogin.OldPassword == "" || changecustomerlogin.OldPassword == " " {
+	if !Validation.IsPasswordValid(changecustomerlogin.OldPassword) {
 		http.Error(w, "Old Password is not valid", http.StatusBadRequest)
 		return
 	}
-	if changecustomerlogin.NewPassword == "" || changecustomerlogin.NewPassword == " " {
+	if !Validation.IsPasswordValid(changecustomerlogin.NewPassword) {
 		http.Error(w, "New Password is not valid", http.StatusBadRequest)
 		return
 	}

@@ -41,11 +41,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Email is not valid", http.StatusBadRequest)
 		return
 	}
-	// if !isPasswordValid(logincustomer.Password) {
-	// 	http.Error(w, "Password is not valid", http.StatusBadRequest)
-	// 	return
-	// }
-	if logincustomer.Password == "" || logincustomer.Password == " " {
+	if !Validation.IsPasswordValid(logincustomer.Password) {
 		http.Error(w, "Password is not valid", http.StatusBadRequest)
 		return
 	}

@@ -18,12 +18,16 @@ func IsEmailValid(email string) bool {
 }
 
 func IsPasswordValid(password string) bool {
-	pattern := `^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`
-	match, err := regexp.MatchString(pattern, password)
-	if err != nil {
+	// pattern := `^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`
+	// match, err := regexp.MatchString(pattern, password)
+	// if err != nil {
+	// 	return false
+	// }
+	// return match
+	if password == "" || password == " " {
 		return false
 	}
-	return match
+	return true
 }
 
 func IsLoginValid(email string, password string) bool {
