@@ -1,11 +1,10 @@
 package customerValidation
 
 import (
-	"database/sql"
 	"fmt"
 	"regexp"
 
-	Dbconfig "github.com/sravan2509/Customer/UserAccountManagement/Dbconfig"
+	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
 )
 
 func IsEmailValid(email string) bool {
@@ -27,10 +26,11 @@ func IsPasswordValid(password string) bool {
 	return match
 }
 
-func IsLoginValid(db *sql.DB, email string, password string) bool {
-	Dbconfig.DBConnection()
+func IsLoginValid(email string, password string) bool {
+	db, err := Dbconfig.DBConnection()
+	defer db.Close()
 	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM customers WHERE Email = ? AND Password = ?", email, password).Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM customers WHERE Email = ? AND Password = ?", email, password).Scan(&count)
 	if err != nil {
 		return false
 	}
@@ -40,9 +40,11 @@ func IsLoginValid(db *sql.DB, email string, password string) bool {
 	return true
 }
 
-func IsCustomerExist(db *sql.DB, email string) bool {
+func IsCustomerExist(email string) bool {
+	db, err := Dbconfig.DBConnection()
+	defer db.Close()
 	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM customers WHERE Email = ?", email).Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM customers WHERE Email = ?", email).Scan(&count)
 	if err != nil {
 		return false
 	}
