@@ -5,17 +5,17 @@ import (
 	"net/http"
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
-	validation "github.com/sravan2509/Customer/Validation"
+	Validation "github.com/sravan2509/Customer/Validation"
 )
 
-func deleteCustomerHandler(w http.ResponseWriter, r *http.Request) {
+func DeleteCustomerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "DELETE" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 	db, err := Dbconfig.DBConnection()
 	defer db.Close()
 	Email := r.URL.Query().Get("Email")
-	if !validation.IsCustomerExist(Email) {
+	if !Validation.IsCustomerExist(Email) {
 		http.Error(w, "Customer not found", http.StatusBadRequest)
 		return
 	}

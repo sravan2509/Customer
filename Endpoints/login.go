@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
-	schema "github.com/sravan2509/Customer/Schema"
-	validation "github.com/sravan2509/Customer/Validation"
+	Schema "github.com/sravan2509/Customer/Schema"
+	Validation "github.com/sravan2509/Customer/Validation"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//unmarshal the body
-	var logincustomer schema.LoginCustomer
+	var logincustomer Schema.LoginCustomer
 	err = json.Unmarshal(body, &logincustomer)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -37,7 +37,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//validating the new logincustomer
-	if !validation.IsEmailValid(logincustomer.Email) {
+	if !Validation.IsEmailValid(logincustomer.Email) {
 		http.Error(w, "Email is not valid", http.StatusBadRequest)
 		return
 	}
@@ -50,12 +50,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validation.IsCustomerExist(logincustomer.Email) {
+	if !Validation.IsCustomerExist(logincustomer.Email) {
 		http.Error(w, "Customer with email address not found", http.StatusBadRequest)
 		return
 	}
 
-	if !validation.IsLoginValid(logincustomer.Email, logincustomer.Password) {
+	if !Validation.IsLoginValid(logincustomer.Email, logincustomer.Password) {
 		http.Error(w, "Incorrect Password", http.StatusBadRequest)
 		return
 	}

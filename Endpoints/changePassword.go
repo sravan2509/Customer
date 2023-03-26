@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
-	schema "github.com/sravan2509/Customer/Schema"
-	validation "github.com/sravan2509/Customer/Validation"
+	Schema "github.com/sravan2509/Customer/Schema"
+	Validation "github.com/sravan2509/Customer/Validation"
 )
 
-func changePasswordHandler(w http.ResponseWriter, r *http.Request) {
+func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "PUT" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -29,7 +29,7 @@ func changePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//unmarshal the body
-	var changecustomerlogin schema.ChangeLogin
+	var changecustomerlogin Schema.ChangeLogin
 	err = json.Unmarshal(body, &changecustomerlogin)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -39,11 +39,11 @@ func changePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf(changecustomerlogin.NewPassword)
 
 	//validating the new logincustomer
-	if !validation.IsEmailValid(changecustomerlogin.Email) {
+	if !Validation.IsEmailValid(changecustomerlogin.Email) {
 		http.Error(w, "Email is not valid", http.StatusBadRequest)
 		return
 	}
-	if !validation.IsCustomerExist(changecustomerlogin.Email) {
+	if !Validation.IsCustomerExist(changecustomerlogin.Email) {
 		http.Error(w, "Customer with email address not found", http.StatusBadRequest)
 		return
 	}
@@ -60,7 +60,7 @@ func changePasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validation.IsLoginValid(changecustomerlogin.Email, changecustomerlogin.OldPassword) {
+	if !Validation.IsLoginValid(changecustomerlogin.Email, changecustomerlogin.OldPassword) {
 		http.Error(w, "oldPassword is Incorrect", http.StatusBadRequest)
 		return
 	}

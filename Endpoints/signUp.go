@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
-	schema "github.com/sravan2509/Customer/Schema"
-	validation "github.com/sravan2509/Customer/Validation"
+	Schema "github.com/sravan2509/Customer/Schema"
+	Validation "github.com/sravan2509/Customer/Validation"
 )
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//unmarshal the body
-	var newCustomer schema.Customer
+	var newCustomer Schema.Customer
 	err = json.Unmarshal(body, &newCustomer)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -36,11 +36,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//validating the new customer
-	if !validation.IsEmailValid(newCustomer.Email) {
+	if !Validation.IsEmailValid(newCustomer.Email) {
 		http.Error(w, "Email is not valid", http.StatusBadRequest)
 		return
 	}
-	if validation.IsCustomerExist(newCustomer.Email) {
+	if Validation.IsCustomerExist(newCustomer.Email) {
 		http.Error(w, "Customer already exists", http.StatusBadRequest)
 		return
 	}
