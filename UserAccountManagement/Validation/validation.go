@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"regexp"
+
+	Dbconfig "github.com/sravan2509/Customer/UserAccountManagement/Dbconfig"
 )
 
 func IsEmailValid(email string) bool {
@@ -26,6 +28,7 @@ func IsPasswordValid(password string) bool {
 }
 
 func IsLoginValid(db *sql.DB, email string, password string) bool {
+	Dbconfig.DBConnection()
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM customers WHERE Email = ? AND Password = ?", email, password).Scan(&count)
 	if err != nil {

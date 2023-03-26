@@ -1,3 +1,3 @@
-module github.com/go-sql-driver/mysql
+module github.com/sravan2509/Customer
 
 go 1.19
