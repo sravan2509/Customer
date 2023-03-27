@@ -2,7 +2,6 @@ package endpoint
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -13,49 +12,38 @@ import (
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	//signup only for post method
 	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		ResponseFormat(w, "Method not allowed", http.StatusMethodNotAllowed, nil)
 		return
 	}
 	db, err := Dbconfig.DBConnection()
+	if err != nil {
+		ResponseFormat(w, "DB Connection Failed", http.StatusInternalServerError, nil)
+		return
+	}
 	defer db.Close()
 
 	//reading the body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
 		return
 	}
 
 	//unmarshal the body
-	var logincustomer Schema.LoginCustomer
+	var logincustomer Schema.Customer
 	err = json.Unmarshal(body, &logincustomer)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
 		return
 	}
 
-	//validating the new logincustomer
-	if !Validation.IsEmailValid(logincustomer.Email) {
-		http.Error(w, "Email is not valid", http.StatusBadRequest)
-		return
-	}
-	if !Validation.IsPasswordValid(logincustomer.Password) {
-		http.Error(w, "Password is not valid", http.StatusBadRequest)
+	//validating the  logincustomer
+	if statusCode, err := Validation.LoginValidation(db, logincustomer); err != nil {
+		ResponseFormat(w, err.Error(), statusCode, nil)
 		return
 	}
 
-	if !Validation.IsCustomerExist(logincustomer.Email) {
-		http.Error(w, "Customer with email address not found", http.StatusBadRequest)
-		return
-	}
-
-	if !Validation.IsLoginValid(logincustomer.Email, logincustomer.Password) {
-		http.Error(w, "Incorrect Password", http.StatusBadRequest)
-		return
-	}
-	fmt.Fprintf(w, "Login succesful!!!!")
-	w.WriteHeader(http.StatusOK)
+	ResponseFormat(w, "Login Success!", http.StatusOK, nil)
 
 }

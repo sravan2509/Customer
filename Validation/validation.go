@@ -1,59 +1,79 @@
 package customerValidation
 
 import (
-	"fmt"
-	"regexp"
+	"database/sql"
+	"errors"
+	"net/http"
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
+	Schema "github.com/sravan2509/Customer/Schema"
 )
 
-func IsEmailValid(email string) bool {
-	pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	match, err := regexp.MatchString(pattern, email)
-	if err != nil {
-		fmt.Println("Error")
-		return false
+func SignupValidation(db *sql.DB, newCustomer Schema.Customer) (int, error) {
+
+	if !IsEmailValid(newCustomer.Email) {
+		return http.StatusBadRequest, errors.New("Email is not valid")
 	}
-	return match
+	if Dbconfig.IsCustomerExist(db, newCustomer.Email) {
+		return http.StatusForbidden, errors.New("Customer already exists")
+	}
+	if !IsPasswordValid(newCustomer.Password) {
+		return http.StatusUnauthorized, errors.New("Password is not Valid")
+	}
+	if newCustomer.Password != newCustomer.ConformPassword {
+		return http.StatusBadRequest, errors.New("Passwords Mismatch")
+	}
+
+	return http.StatusCreated, nil
 }
 
-func IsPasswordValid(password string) bool {
-	// pattern := `^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`
-	// match, err := regexp.MatchString(pattern, password)
-	// if err != nil {
-	// 	return false
-	// }
-	// return match
-	if password == "" || password == " " {
-		return false
+func LoginValidation(db *sql.DB, logincustomer Schema.Customer) (int, error) {
+
+	if !IsEmailValid(logincustomer.Email) {
+		return http.StatusBadRequest, errors.New("Email is not valid")
 	}
-	return true
+	if !Dbconfig.IsCustomerExist(db, logincustomer.Email) {
+		return http.StatusBadRequest, errors.New("Customer with email address not found")
+	}
+	if !IsPasswordValid(logincustomer.Password) {
+		return http.StatusUnauthorized, errors.New("Password is not Valid")
+	}
+	if status, err := Dbconfig.IsLoginValid(db, logincustomer.Email, logincustomer.Password); err != nil {
+		return status, err
+	}
+
+	return http.StatusAccepted, nil
 }
 
-func IsLoginValid(email string, password string) bool {
-	db, err := Dbconfig.DBConnection()
-	defer db.Close()
-	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM customers WHERE Email = ? AND Password = ?", email, password).Scan(&count)
-	if err != nil {
-		return false
+func DeleteCustomerValidation(db *sql.DB, Email string) (int, error) {
+
+	if !IsEmailValid(Email) {
+		return http.StatusBadRequest, errors.New("Email is not valid")
 	}
-	if count == 0 {
-		return false
+	if !Dbconfig.IsCustomerExist(db, Email) {
+		return http.StatusBadRequest, errors.New("Customer with email not found")
 	}
-	return true
+
+	return http.StatusOK, nil
 }
 
-func IsCustomerExist(email string) bool {
-	db, err := Dbconfig.DBConnection()
-	defer db.Close()
-	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM customers WHERE Email = ?", email).Scan(&count)
-	if err != nil {
-		return false
+func ChangePasswordValidation(db *sql.DB, changecustomerlogin Schema.Customer) (int, error) {
+
+	if !IsEmailValid(changecustomerlogin.Email) {
+		return http.StatusBadRequest, errors.New("Email is not valid")
 	}
-	if count > 0 {
-		return true
+	if !Dbconfig.IsCustomerExist(db, changecustomerlogin.Email) {
+		return http.StatusBadRequest, errors.New("Customer with email not found")
 	}
-	return false
+	if !IsPasswordValid(changecustomerlogin.Password) {
+		return http.StatusUnauthorized, errors.New("Password is not Valid")
+	}
+	if !IsPasswordValid(changecustomerlogin.NewPassword) {
+		return http.StatusUnauthorized, errors.New("New Password is not Valid")
+	}
+	if status, err := Dbconfig.IsLoginValid(db, changecustomerlogin.Email, changecustomerlogin.Password); err != nil {
+		return status, err
+	}
+
+	return 204, nil
 }

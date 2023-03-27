@@ -1,7 +1,6 @@
 package endpoint
 
 import (
-	"fmt"
 	"net/http"
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
@@ -10,23 +9,31 @@ import (
 
 func DeleteCustomerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "DELETE" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		ResponseFormat(w, "Method not allowed", http.StatusMethodNotAllowed, nil)
 	}
+
+	// db connection
 	db, err := Dbconfig.DBConnection()
-	defer db.Close()
-	Email := r.URL.Query().Get("Email")
-	if !Validation.IsCustomerExist(Email) {
-		http.Error(w, "Customer not found", http.StatusBadRequest)
-		return
-	}
-
-	_, err = db.Query(`DELETE FROM customers WHERE Email = ?`, Email)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ResponseFormat(w, "DB Connection Failed", http.StatusInternalServerError, nil)
+		return
+	}
+	defer db.Close()
+
+	//reading the Email from query
+	Email := r.URL.Query().Get("Email")
+
+	//validate the email
+	if statusCode, err := Validation.DeleteCustomerValidation(db, Email); err != nil {
+		ResponseFormat(w, err.Error(), statusCode, nil)
+	}
+
+	//Deleting the Customer
+	if statusCode, err := Dbconfig.DeleteCustomer(db, Email); err != nil {
+		ResponseFormat(w, err.Error(), statusCode, nil)
 		return
 	}
 
-	fmt.Fprintf(w, "Customer Deleted Successfully!")
-	w.WriteHeader(http.StatusOK)
+	ResponseFormat(w, "Customer Deleted Successfully!", http.StatusOK, nil)
 
 }

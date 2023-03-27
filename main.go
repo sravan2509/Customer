@@ -9,13 +9,15 @@ import (
 )
 
 func main() {
-	_, err := Dbconfig.DBConnection()
+	db, err := Dbconfig.DBConnection()
+	defer db.Close()
 
 	//handling routes
 	http.HandleFunc("/Signup", Handler.SignupHandler)
 	http.HandleFunc("/changePassword", Handler.ChangePasswordHandler)
 	http.HandleFunc("/login", Handler.LoginHandler)
 	http.HandleFunc("/deleteCustomer", Handler.DeleteCustomerHandler)
+	http.HandleFunc("/getCustomers", Handler.GetAllCustomersHandler)
 
 	//hosting the server
 	fmt.Println("Local host is servered at port 8080")

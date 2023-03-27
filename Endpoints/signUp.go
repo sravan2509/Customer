@@ -14,16 +14,20 @@ import (
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	//signup only for post method
 	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		ResponseFormat(w, "Method not allowed", http.StatusMethodNotAllowed, nil)
 		return
 	}
 
 	db, err := Dbconfig.DBConnection()
+	if err != nil {
+		ResponseFormat(w, "DB Connection Failed", http.StatusInternalServerError, nil)
+		return
+	}
 	defer db.Close()
 	//reading the body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
 		return
 	}
 
@@ -31,35 +35,20 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var newCustomer Schema.Customer
 	err = json.Unmarshal(body, &newCustomer)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
 		return
 	}
 
 	//validating the new customer
-	if !Validation.IsEmailValid(newCustomer.Email) {
-		http.Error(w, "Email is not valid", http.StatusBadRequest)
-		return
-	}
-	if Validation.IsCustomerExist(newCustomer.Email) {
-		http.Error(w, "Customer already exists", http.StatusBadRequest)
-		return
-	}
-	if !Validation.IsPasswordValid(newCustomer.Password) {
-		http.Error(w, "Password is not valid", http.StatusBadRequest)
+	if ErrorCode, err := Validation.SignupValidation(db, newCustomer); err != nil {
+		ResponseFormat(w, err.Error(), ErrorCode, nil)
 		return
 	}
 
 	//adding the new customer to DB
-	stmt, err := db.Prepare(`INSERT INTO customers(Name,Email,PhoneNumber,Password,Address) Values (?,?,?,?,?)`)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if Errorcode, err := Dbconfig.InsertCustomer(db, newCustomer); err != nil {
+		ResponseFormat(w, err.Error(), Errorcode, nil)
 		return
 	}
-	_, err = stmt.Exec(newCustomer.Name, newCustomer.Email, newCustomer.PhoneNumber, newCustomer.Password, newCustomer.Address)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fmt.Fprintf(w, "Customer %s created successfully", newCustomer.Email)
-	w.WriteHeader(http.StatusCreated)
+	ResponseFormat(w, fmt.Sprintf("Customer %s created successfully", newCustomer.Email), http.StatusCreated, nil)
 }

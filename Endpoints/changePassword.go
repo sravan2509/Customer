@@ -2,7 +2,6 @@ package endpoint
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -14,59 +13,43 @@ import (
 func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "PUT" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		ResponseFormat(w, "Method not allowed", http.StatusMethodNotAllowed, nil)
 		return
 	}
 
 	db, err := Dbconfig.DBConnection()
+	if err != nil {
+		ResponseFormat(w, "DB Connection Failed", http.StatusInternalServerError, nil)
+		return
+	}
 	defer db.Close()
 
 	//reading the body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
 		return
 	}
 
 	//unmarshal the body
-	var changecustomerlogin Schema.ChangeLogin
+	var changecustomerlogin Schema.Customer
 	err = json.Unmarshal(body, &changecustomerlogin)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
 		return
 	}
-
-	fmt.Printf(changecustomerlogin.NewPassword)
 
 	//validating the new logincustomer
-	if !Validation.IsEmailValid(changecustomerlogin.Email) {
-		http.Error(w, "Email is not valid", http.StatusBadRequest)
-		return
-	}
-	if !Validation.IsCustomerExist(changecustomerlogin.Email) {
-		http.Error(w, "Customer with email address not found", http.StatusBadRequest)
-		return
-	}
-	if !Validation.IsPasswordValid(changecustomerlogin.OldPassword) {
-		http.Error(w, "Old Password is not valid", http.StatusBadRequest)
-		return
-	}
-	if !Validation.IsPasswordValid(changecustomerlogin.NewPassword) {
-		http.Error(w, "New Password is not valid", http.StatusBadRequest)
+	if StatusCode, err := Validation.ChangePasswordValidation(db, changecustomerlogin); err != nil {
+		ResponseFormat(w, err.Error(), StatusCode, nil)
 		return
 	}
 
-	if !Validation.IsLoginValid(changecustomerlogin.Email, changecustomerlogin.OldPassword) {
-		http.Error(w, "oldPassword is Incorrect", http.StatusBadRequest)
+	// updating the password
+	if status, err := Dbconfig.UpdateCustomer(db, changecustomerlogin); err != nil {
+		ResponseFormat(w, err.Error(), status, nil)
 		return
 	}
-
-	_, err = db.Query(`UPDATE customers SET Password = ? WHERE Email = ?`, changecustomerlogin.NewPassword, changecustomerlogin.Email)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fmt.Fprintf(w, "Customer Password is updated successfully!")
-	w.WriteHeader(http.StatusOK)
+	ResponseFormat(w, "Customer Password is updated successfully!", http.StatusOK, nil)
 
 }
