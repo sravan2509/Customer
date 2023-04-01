@@ -45,10 +45,13 @@ func LoginValidation(db *sql.DB, logincustomer Schema.Customer) (int, error) {
 	return http.StatusAccepted, nil
 }
 
-func DeleteCustomerValidation(db *sql.DB, Email string) (int, error) {
+func DeleteCustomerValidation(db *sql.DB, Email string, TokenEmail string) (int, error) {
 
 	if !IsEmailValid(Email) {
 		return http.StatusBadRequest, errors.New("Email is not valid")
+	}
+	if TokenEmail != Email {
+		return http.StatusBadRequest, errors.New("Invalid Email login")
 	}
 	if !Dbconfig.IsCustomerExist(db, Email) {
 		return http.StatusBadRequest, errors.New("Customer with email not found")
@@ -57,10 +60,13 @@ func DeleteCustomerValidation(db *sql.DB, Email string) (int, error) {
 	return http.StatusOK, nil
 }
 
-func ChangePasswordValidation(db *sql.DB, changecustomerlogin Schema.Customer) (int, error) {
+func ChangePasswordValidation(db *sql.DB, changecustomerlogin Schema.Customer, TokenEmail string) (int, error) {
 
 	if !IsEmailValid(changecustomerlogin.Email) {
 		return http.StatusBadRequest, errors.New("Email is not valid")
+	}
+	if TokenEmail != changecustomerlogin.Email {
+		return http.StatusBadRequest, errors.New("Invalid Email login")
 	}
 	if !Dbconfig.IsCustomerExist(db, changecustomerlogin.Email) {
 		return http.StatusBadRequest, errors.New("Customer with email not found")

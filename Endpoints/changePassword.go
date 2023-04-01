@@ -12,6 +12,12 @@ import (
 
 func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 
+	TokenEmail, ok := r.Context().Value("Email").(string)
+	if !ok {
+		ResponseFormat(w, "Email not found in context", http.StatusInternalServerError, nil)
+		return
+	}
+
 	if r.Method != "PUT" {
 		ResponseFormat(w, "Method not allowed", http.StatusMethodNotAllowed, nil)
 		return
@@ -40,7 +46,7 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//validating the new logincustomer
-	if StatusCode, err := Validation.ChangePasswordValidation(db, changecustomerlogin); err != nil {
+	if StatusCode, err := Validation.ChangePasswordValidation(db, changecustomerlogin, TokenEmail); err != nil {
 		ResponseFormat(w, err.Error(), StatusCode, nil)
 		return
 	}

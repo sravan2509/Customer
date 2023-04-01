@@ -4,10 +4,17 @@ import (
 	"net/http"
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
+	Token "github.com/sravan2509/Customer/TokenHandler"
 	Validation "github.com/sravan2509/Customer/Validation"
 )
 
 func DeleteCustomerHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the email address from the request context
+	TokenEmail, ok := r.Context().Value("Email").(string)
+	if !ok {
+		ResponseFormat(w, "Email not found in context", http.StatusInternalServerError, nil)
+		return
+	}
 	if r.Method != "DELETE" {
 		ResponseFormat(w, "Method not allowed", http.StatusMethodNotAllowed, nil)
 	}
@@ -24,8 +31,9 @@ func DeleteCustomerHandler(w http.ResponseWriter, r *http.Request) {
 	Email := r.URL.Query().Get("Email")
 
 	//validate the email
-	if statusCode, err := Validation.DeleteCustomerValidation(db, Email); err != nil {
+	if statusCode, err := Validation.DeleteCustomerValidation(db, Email, TokenEmail); err != nil {
 		ResponseFormat(w, err.Error(), statusCode, nil)
+		return
 	}
 
 	//Deleting the Customer
@@ -34,6 +42,7 @@ func DeleteCustomerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Token.RemoveToken(w, r)
 	ResponseFormat(w, "Customer Deleted Successfully!", http.StatusOK, nil)
 
 }

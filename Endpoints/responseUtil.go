@@ -7,7 +7,7 @@ import (
 	Schema "github.com/sravan2509/Customer/Schema"
 )
 
-func ResponseFormat(w http.ResponseWriter, Message string, StatusCode int, Data []Schema.Customer) {
+func ResponseFormat(w http.ResponseWriter, Message string, StatusCode int, Data interface{}) {
 	response := Schema.Response{
 		StatusCode: StatusCode,
 		Message:    Message,

@@ -7,6 +7,7 @@ import (
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
 	Schema "github.com/sravan2509/Customer/Schema"
+	Token "github.com/sravan2509/Customer/TokenHandler"
 	Validation "github.com/sravan2509/Customer/Validation"
 )
 
@@ -44,6 +45,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ResponseFormat(w, "Login Success!", http.StatusOK, nil)
+	token, err := Token.GenerateToken(logincustomer.Email)
+
+	if err != nil {
+		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
+	}
+
+	ResponseFormat(w, "Login Success!", http.StatusOK, token)
 
 }

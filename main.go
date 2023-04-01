@@ -6,6 +6,7 @@ import (
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
 	Handler "github.com/sravan2509/Customer/Endpoints"
+	Token "github.com/sravan2509/Customer/TokenHandler"
 )
 
 func main() {
@@ -14,10 +15,10 @@ func main() {
 
 	//handling routes
 	http.HandleFunc("/Signup", Handler.SignupHandler)
-	http.HandleFunc("/changePassword", Handler.ChangePasswordHandler)
 	http.HandleFunc("/login", Handler.LoginHandler)
-	http.HandleFunc("/deleteCustomer", Handler.DeleteCustomerHandler)
-	http.HandleFunc("/getCustomers", Handler.GetAllCustomersHandler)
+	http.Handle("/changePassword", Token.AuthMiddleware(http.HandlerFunc(Handler.ChangePasswordHandler)))
+	http.Handle("/deleteCustomer", Token.AuthMiddleware(http.HandlerFunc(Handler.DeleteCustomerHandler)))
+	http.Handle("/getCustomers", Token.AuthMiddleware(http.HandlerFunc(Handler.GetAllCustomersHandler)))
 
 	//hosting the server
 	fmt.Println("Local host is servered at port 8080")
