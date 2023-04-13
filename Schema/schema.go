@@ -1,12 +1,12 @@
 package CustomerSchema
 
 type Customer struct {
-	Name            string `json:"Name"`
-	PhoneNumber     string `json:"PhoneNumber"`
-	Password        string `json:"Password"`
-	Email           string `json:"Email"`
-	Address         string `json:"Address"`
-	NewPassword     string `json:"NewPassword"`
+	Name        string `json:"Name"`
+	PhoneNumber string `json:"PhoneNumber"`
+	Password    string `json:"Password"`
+	Email       string `json:"Email"`
+	Address     string `json:"Address"`
+	// NewPassword     string `json:"NewPassword"`
 	ConformPassword string `json:"ConformPassword"`
 }
 
@@ -16,13 +16,13 @@ type Response struct {
 	Data       interface{} `json:"Data"`
 }
 
-// type LoginCustomer struct {
-// 	Password string `json:"Password"`
-// 	Email    string `json:"Email"`
-// }
+type LoginCustomer struct {
+	Password string `json:"Password"`
+	Email    string `json:"Email"`
+}
 
-// type ChangeLogin struct {
-// 	Email       string `json:"Email"`
-// 	NewPassword string `json:"NewPassword"`
-// 	OldPassword string `json:"OldPassword"`
-// }
+type ChangeLoginPassword struct {
+	Email       string `json:"Email"`
+	NewPassword string `json:"NewPassword"`
+	Password    string `json:"OldPassword"`
+}

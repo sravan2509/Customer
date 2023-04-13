@@ -21,8 +21,8 @@ func main() {
 	http.Handle("/getCustomers", Token.AuthMiddleware(http.HandlerFunc(Handler.GetAllCustomersHandler)))
 
 	//hosting the server
-	fmt.Println("Local host is servered at port 8080")
-	err = http.ListenAndServe(":8080", nil)
+	fmt.Println("Local host is servered at port 8000")
+	err = http.ListenAndServe(":8000", nil)
 	if err != nil {
 		fmt.Println("Error in hosting the server", err)
 	}

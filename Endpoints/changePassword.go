@@ -38,7 +38,7 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//unmarshal the body
-	var changecustomerlogin Schema.Customer
+	var changecustomerlogin Schema.ChangeLoginPassword
 	err = json.Unmarshal(body, &changecustomerlogin)
 	if err != nil {
 		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)

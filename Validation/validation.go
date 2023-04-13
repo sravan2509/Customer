@@ -18,22 +18,25 @@ func SignupValidation(db *sql.DB, newCustomer Schema.Customer) (int, error) {
 		return http.StatusForbidden, errors.New("Customer already exists")
 	}
 	if !IsPasswordValid(newCustomer.Password) {
-		return http.StatusUnauthorized, errors.New("Password is not Valid")
+		return http.StatusBadRequest, errors.New("Password is not Valid")
 	}
 	if newCustomer.Password != newCustomer.ConformPassword {
 		return http.StatusBadRequest, errors.New("Passwords Mismatch")
+	}
+	if !IsPhoneNumberValid(newCustomer.PhoneNumber) {
+		return http.StatusBadRequest, errors.New("Invalid phone number")
+	}
+	if newCustomer.Name == "" {
+		return http.StatusBadRequest, errors.New("Name is required")
 	}
 
 	return http.StatusCreated, nil
 }
 
-func LoginValidation(db *sql.DB, logincustomer Schema.Customer) (int, error) {
+func LoginValidation(db *sql.DB, logincustomer Schema.LoginCustomer) (int, error) {
 
 	if !IsEmailValid(logincustomer.Email) {
 		return http.StatusBadRequest, errors.New("Email is not valid")
-	}
-	if !Dbconfig.IsCustomerExist(db, logincustomer.Email) {
-		return http.StatusBadRequest, errors.New("Customer with email address not found")
 	}
 	if !IsPasswordValid(logincustomer.Password) {
 		return http.StatusUnauthorized, errors.New("Password is not Valid")
@@ -60,7 +63,7 @@ func DeleteCustomerValidation(db *sql.DB, Email string, TokenEmail string) (int,
 	return http.StatusOK, nil
 }
 
-func ChangePasswordValidation(db *sql.DB, changecustomerlogin Schema.Customer, TokenEmail string) (int, error) {
+func ChangePasswordValidation(db *sql.DB, changecustomerlogin Schema.ChangeLoginPassword, TokenEmail string) (int, error) {
 
 	if !IsEmailValid(changecustomerlogin.Email) {
 		return http.StatusBadRequest, errors.New("Email is not valid")

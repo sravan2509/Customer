@@ -3,8 +3,8 @@ package Token
 import (
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
-	config "github.com/sravan2509/Customer/Config"
+	"github.com/golang-jwt/jwt"
+	Config "github.com/sravan2509/Customer/Config"
 )
 
 func GenerateToken(Email string) (string, error) {
@@ -14,5 +14,5 @@ func GenerateToken(Email string) (string, error) {
 		"exp":   time.Now().Add(time.Hour * 1).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(config.SecretKey())
+	return token.SignedString(Config.SecretKey())
 }

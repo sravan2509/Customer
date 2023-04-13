@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
-	config "github.com/sravan2509/Customer/Config"
+	"github.com/golang-jwt/jwt"
+	Config "github.com/sravan2509/Customer/Config"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
@@ -24,7 +24,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return config.SecretKey(), nil
+			return Config.SecretKey(), nil
 		})
 		fmt.Println(token)
 		if err != nil {

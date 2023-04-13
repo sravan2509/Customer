@@ -6,15 +6,20 @@ import (
 	"net/http"
 
 	Schema "github.com/sravan2509/Customer/Schema"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func InsertCustomer(db *sql.DB, newCustomer Schema.Customer) (int, error) {
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newCustomer.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
 	stmt, err := db.Prepare(`INSERT INTO customers(Name,Email,PhoneNumber,Password,Address) Values (?,?,?,?,?)`)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	_, err = stmt.Exec(newCustomer.Name, newCustomer.Email, newCustomer.PhoneNumber, newCustomer.Password, newCustomer.Address)
+	_, err = stmt.Exec(newCustomer.Name, newCustomer.Email, newCustomer.PhoneNumber, string(hashedPassword), newCustomer.Address)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -30,8 +35,12 @@ func DeleteCustomer(db *sql.DB, Email string) (int, error) {
 	return 204, nil
 }
 
-func UpdateCustomer(db *sql.DB, changecustomerlogin Schema.Customer) (int, error) {
-	_, err := db.Query(`UPDATE customers SET Password = ? WHERE Email = ?`, changecustomerlogin.NewPassword, changecustomerlogin.Email)
+func UpdateCustomer(db *sql.DB, changecustomerlogin Schema.ChangeLoginPassword) (int, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(changecustomerlogin.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+	_, err = db.Query(`UPDATE customers SET Password = ? WHERE Email = ?`, string(hashedPassword), changecustomerlogin.Email)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -47,13 +56,16 @@ func GetCustomers(db *sql.DB) (int, error, *sql.Rows) {
 }
 
 func IsLoginValid(db *sql.DB, email string, password string) (int, error) {
-	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM customers WHERE Email = ? AND Password = ?", email, password).Scan(&count)
+	var hashedPassword string
+	err := db.QueryRow("SELECT Password FROM customers WHERE Email = ?", email).Scan(&hashedPassword)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	if count == 0 {
-		return http.StatusBadRequest, errors.New("Invalid Password")
+	if hashedPassword == "" {
+		return http.StatusBadRequest, errors.New("Email Not Found")
+	}
+	if bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)) != nil {
+		return http.StatusBadRequest, errors.New("Incorrect Password")
 	}
 	return http.StatusOK, nil
 }

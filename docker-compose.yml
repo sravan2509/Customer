@@ -1,0 +1,32 @@
+version: "3"
+services:
+  db:
+    container_name: Customer
+    image: "mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: golang
+      MYSQL_PASSWORD: Sravan@2509
+      MYSQL_TCP_PORT: 3307
+    ports:
+      - 3307:3307
+    expose:
+      - 3307
+    volumes:
+      - ./data:/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+  api:
+    build: .
+    restart: on-failure
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3307
+      - DB_NAME=golang
+      - DB_USER=root
+      - DB_PASS=Sravan@2509
+    ports:
+      - 8002:8000

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
-	Token "github.com/sravan2509/Customer/TokenHandler"
 	Validation "github.com/sravan2509/Customer/Validation"
 )
 
@@ -42,7 +41,6 @@ func DeleteCustomerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Token.RemoveToken(w, r)
 	ResponseFormat(w, "Customer Deleted Successfully!", http.StatusOK, nil)
 
 }

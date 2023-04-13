@@ -8,6 +8,7 @@ import (
 
 	Dbconfig "github.com/sravan2509/Customer/Dbconfig"
 	Schema "github.com/sravan2509/Customer/Schema"
+	Token "github.com/sravan2509/Customer/TokenHandler"
 	Validation "github.com/sravan2509/Customer/Validation"
 )
 
@@ -50,5 +51,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		ResponseFormat(w, err.Error(), Errorcode, nil)
 		return
 	}
-	ResponseFormat(w, fmt.Sprintf("Customer %s created successfully", newCustomer.Email), http.StatusCreated, nil)
+
+	token, err := Token.GenerateToken(newCustomer.Email)
+
+	if err != nil {
+		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
+	}
+	ResponseFormat(w, fmt.Sprintf("Customer %s created successfully", newCustomer.Email), http.StatusCreated, token)
 }

@@ -32,7 +32,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//unmarshal the body
-	var logincustomer Schema.Customer
+	var logincustomer Schema.LoginCustomer
 	err = json.Unmarshal(body, &logincustomer)
 	if err != nil {
 		ResponseFormat(w, err.Error(), http.StatusInternalServerError, nil)
